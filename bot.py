@@ -8,6 +8,6 @@ class ShajeshBot(discord.Client):
     async def on_message(self, message):
         print(f'Message from {message.author}: {message.content}')
 
-
+#test commit
 client = ShajeshBot()
 client.run(os.getenv('SHAJESHBOT_TOKEN'))
