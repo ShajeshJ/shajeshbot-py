@@ -1,7 +1,7 @@
 import os
 from discord.ext.commands import Bot
 from cogs.roles import RolesCog
-# test
+
 class ShajeshBot(Bot):
     async def on_ready(self):
         print(f'Logged on as {self.user}')
