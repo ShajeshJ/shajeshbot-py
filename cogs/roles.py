@@ -1,7 +1,7 @@
 import discord
 import discord.ext.commands as cmd
 
-class RolesCog(cmd.Cog):
+class RolesCog(cmd.Cog, name='Roles'):
     def __init__(self, bot):
         self.bot = bot
 
@@ -12,13 +12,11 @@ class RolesCog(cmd.Cog):
             await ctx.send('Cannot specify a role with an empty name')
             return
 
-        guild: discord.Guild = ctx.guild
-
-        if any(role.name.lower() == role_name.lower() for role in guild.roles):
+        if any(role.name.lower() == role_name.lower() for role in ctx.guild.roles):
             await ctx.send(f'Cannot create another group with the name "{role_name}"')
             return
 
-        await guild.create_role(name=role_name, mentionable=True, reason="Created through command")
+        await ctx.guild.create_role(name=role_name, mentionable=True, reason="Created through command")
         await ctx.send(f'"{role_name}" created successfully')
 
 
