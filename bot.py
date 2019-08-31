@@ -1,6 +1,6 @@
-import os
 from discord.ext.commands import Bot
 from cogs.roles import RolesCog
+from config import BOT_TOKEN
 
 class ShajeshBot(Bot):
     async def on_ready(self):
@@ -11,4 +11,4 @@ bot = ShajeshBot(command_prefix='!')
 bot.add_cog(RolesCog(bot))
 
 if __name__ == "__main__":
-    bot.run(os.getenv('SHAJESHBOT_TOKEN'))
+    bot.run(BOT_TOKEN)
