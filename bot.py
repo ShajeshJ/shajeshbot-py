@@ -1,13 +1,14 @@
-import discord
 import os
+from discord.ext.commands import Bot
+from cogs.roles import RolesCog
 
-class ShajeshBot(discord.Client):
+class ShajeshBot(Bot):
     async def on_ready(self):
         print(f'Logged on as {self.user}')
 
-    async def on_message(self, message):
-        print(f'Message from {message.author}: {message.content}')
 
+bot = ShajeshBot(command_prefix='!')
+bot.add_cog(RolesCog(bot))
 
-client = ShajeshBot()
-client.run(os.getenv('SHAJESHBOT_TOKEN'))
+if __name__ == "__main__":
+    bot.run(os.getenv('SHAJESHBOT_TOKEN'))
