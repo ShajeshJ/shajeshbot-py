@@ -8,16 +8,21 @@ class RolesCog(cmd.Cog, name='Roles'):
 
     @cmd.command(name='create')
     async def create_mention_group(self, ctx: cmd.Context, *, role_name: str):
-        if not role_name:
-            await ctx.send('Cannot specify a role with an empty name')
-            return
-
         if any(role.name.lower() == role_name.lower() for role in ctx.guild.roles):
             await ctx.send(f'Cannot create another group with the name "{role_name}"')
             return
 
         await ctx.guild.create_role(name=role_name, mentionable=True, reason="Created through command")
         await ctx.send(f'"{role_name}" created successfully')
+
+
+    @create_mention_group.error
+    async def create_error_handler(self, ctx: cmd.Context, error: cmd.CommandError):
+        print(error)
+
+        if isinstance(error, cmd.MissingRequiredArgument):
+            if error.param.name == 'role_name':
+                await ctx.send('Cannot specify a role with an empty name')
 
 
     @cmd.command(name='join')
@@ -42,3 +47,7 @@ class RolesCog(cmd.Cog, name='Roles'):
     @cmd.command(name='list')
     async def list_mention_groups(self, ctx: cmd.Context):
         pass
+
+
+def setup(bot):
+    bot.add_cog(RolesCog(bot))
