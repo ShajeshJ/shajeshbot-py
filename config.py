@@ -1,4 +1,5 @@
 import os
 
 BOT_TOKEN = os.environ['SHAJESHBOT_TOKEN']
-MENTION_CHANNEL = int(os.environ['MENTION_CHANNEL'])
+MENTION_CH_ID = int(os.environ['MENTION_CHANNEL'])
+ADMIN_ID = int(os.environ(['ADMIN']))

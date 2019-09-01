@@ -1,6 +1,6 @@
 import discord
 import discord.ext.commands as cmd
-from config import MENTION_CHANNEL as mention_ch_id
+from config import MENTION_CH_ID, ADMIN_ID
 from error import UnexpectedDataError
 
 class RolesCog(cmd.Cog, name='Roles'):
@@ -17,7 +17,7 @@ class RolesCog(cmd.Cog, name='Roles'):
             return
 
         role = await ctx.guild.create_role(name=role_name, mentionable=True, reason="Created through command")
-        mention_ch = ctx.guild.get_channel(mention_ch_id)
+        mention_ch = ctx.guild.get_channel(MENTION_CH_ID)
         msg = await mention_ch.send(f'Join {role.mention}')
         await msg.add_reaction(self._join_emoji)
         await ctx.send(f'"{role_name}" created successfully')
@@ -45,12 +45,16 @@ class RolesCog(cmd.Cog, name='Roles'):
             return
 
         if len(msg.role_mentions) != 1:
-            raise UnexpectedDataError(f'Message "{content}" has {len(msg.role_mentions)} roles mentioned')
+            admin = ctx.guild.get_member(ADMIN_ID)
+            await admin.send(
+                f'{ctx.author} attempted to join role from message "{msg.content}". '
+                f'Failed because message has {len(msg.role_mentions)} roles mentioned'
+            )
+            raise UnexpectedDataError(f'Message "{msg.content}" has {len(msg.role_mentions)} roles mentioned')
 
         role = msg.role_mentions[0]
         
         if role in user.roles:
-            await user.send(f'You are already in the mention group "{role.name}"')
             return
 
         await user.add_roles(role, reason='Bot command', atomic=True)
@@ -69,12 +73,16 @@ class RolesCog(cmd.Cog, name='Roles'):
             return
 
         if len(msg.role_mentions) != 1:
-            raise UnexpectedDataError(f'Message "{content}" {len(msg.role_mentions)} roles mentioned')
+            admin = ctx.guild.get_member(ADMIN_ID)
+            await admin.send(
+                f'{ctx.author} attempted to leave role from message "{msg.content}". '
+                f'Failed because message has {len(msg.role_mentions)} roles mentioned'
+            )
+            raise UnexpectedDataError(f'Message "{msg.content}" has {len(msg.role_mentions)} roles mentioned')
 
         role = msg.role_mentions[0]
         
         if role not in user.roles:
-            await user.send(f'You are not in the mention group "{role.name}"')
             return
 
         await user.remove_roles(role, reason='Bot command', atomic=True)
@@ -82,15 +90,6 @@ class RolesCog(cmd.Cog, name='Roles'):
 
     @cmd.command(name='delete')
     async def delete_mention_group(self, ctx: cmd.Context, *, role:discord.Role):
-        pass
-
-    @cmd.command(name='members')
-    async def list_group_members(self, ctx: cmd.Context, *, role:discord.Role):
-        pass
-
-
-    @cmd.command(name='list')
-    async def list_mention_groups(self, ctx: cmd.Context):
         pass
 
 
