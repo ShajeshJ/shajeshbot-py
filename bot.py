@@ -46,6 +46,7 @@ async def reload_ext_error_handler(ctx, error):
 
 
 bot.load_extension('cogs.roles')
+bot.load_extension('cogs.emojis')
 
 if __name__ == "__main__":
     bot.run(BOT_TOKEN)
