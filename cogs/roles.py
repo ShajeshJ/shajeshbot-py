@@ -62,6 +62,9 @@ class RolesCog(cmd.Cog, name='Roles'):
         if role in user.roles:
             return
 
+        if role.id in PROTECTED_ROLE_IDS or not role.mentionable:
+            return
+
         await user.add_roles(role, reason='Bot command', atomic=True)
 
 
@@ -88,6 +91,9 @@ class RolesCog(cmd.Cog, name='Roles'):
         role = msg.role_mentions[0]
         
         if role not in user.roles:
+            return
+
+        if role.id in PROTECTED_ROLE_IDS or not role.mentionable:
             return
 
         await user.remove_roles(role, reason='Bot command', atomic=True)
