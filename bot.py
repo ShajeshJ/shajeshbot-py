@@ -17,17 +17,25 @@ bot = ShajeshBot(command_prefix='!')
 @bot.command('reloadext', hidden=True)
 @has_permissions(administrator=True)
 async def reload_ext(ctx, *, ext:str):
-    try:
-        bot.reload_extension(ext)
-    except Exception as e:
-        print(f'**ERROR** {type(e).__name__} - {e}')
-        print("Loaded Cogs: ")
-        for loaded_ext in bot.extensions:
-            print(loaded_ext)
-        await ctx.send('fail')
-    else:
-        print(f'Reloaded {ext}')
-        await ctx.send('success')
+
+    async def try_reload(ext, send_error=False):
+        try:
+            bot.reload_extension(ext)
+        except:
+            if send_error:
+                print(f'**ERROR** {type(e).__name__} - {e}')
+                await ctx.send('fail')
+            return False
+        else:
+            print(f'Reloaded {ext}')
+            await ctx.send('success')
+            return True
+
+    if await try_reload(ext):
+        return
+
+    await try_reload('cogs.' + ext, True)
+
 
 @reload_ext.error
 async def reload_ext_error_handler(ctx, error):
