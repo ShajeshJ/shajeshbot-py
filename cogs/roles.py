@@ -1,6 +1,10 @@
 import discord
 import discord.ext.commands as cmd
-from config import MENTION_CH_ID, ADMIN_ID
+from config import (
+    MENTION_CH_ID,
+    ADMIN_ID,
+    PROTECTED_ROLE_IDS,
+)
 from error import UnexpectedDataError
 
 class RolesCog(cmd.Cog, name='Roles'):
@@ -17,11 +21,12 @@ class RolesCog(cmd.Cog, name='Roles'):
             return
 
         role = await ctx.guild.create_role(name=role_name, mentionable=True, reason="Created through command")
-        mention_ch = ctx.guild.get_channel(MENTION_CH_ID)
-        msg = await mention_ch.send(f'Join {role.mention}')
-        await msg.add_reaction(self._join_emoji)
-        await ctx.send(f'"{role_name}" created successfully')
 
+        mention_ch = ctx.guild.get_channel(MENTION_CH_ID)
+        msg = await mention_ch.send(f'**\*\*Join\*\*** {role.mention}')
+        await msg.add_reaction(self._join_emoji)
+
+        await ctx.send(f'"{role_name}" created successfully')
 
     @create_mention_group.error
     async def create_error_handler(self, ctx: cmd.Context, error: cmd.CommandError):
@@ -38,16 +43,16 @@ class RolesCog(cmd.Cog, name='Roles'):
             return
 
         msg = reaction.message
-        if msg.channel.id != mention_ch_id:
+        if msg.channel.id != MENTION_CH_ID:
             return
 
         if reaction.emoji != self._join_emoji:
             return
 
         if len(msg.role_mentions) != 1:
-            admin = ctx.guild.get_member(ADMIN_ID)
+            admin = user.guild.get_member(ADMIN_ID)
             await admin.send(
-                f'{ctx.author} attempted to join role from message "{msg.content}". '
+                f'{user} attempted to join role from message "{msg.content}". '
                 f'Failed because message has {len(msg.role_mentions)} roles mentioned'
             )
             raise UnexpectedDataError(f'Message "{msg.content}" has {len(msg.role_mentions)} roles mentioned')
@@ -66,16 +71,16 @@ class RolesCog(cmd.Cog, name='Roles'):
             return
 
         msg = reaction.message
-        if msg.channel.id != mention_ch_id:
+        if msg.channel.id != MENTION_CH_ID:
             return
 
         if reaction.emoji != self._join_emoji:
             return
 
         if len(msg.role_mentions) != 1:
-            admin = ctx.guild.get_member(ADMIN_ID)
+            admin = user.guild.get_member(ADMIN_ID)
             await admin.send(
-                f'{ctx.author} attempted to leave role from message "{msg.content}". '
+                f'{user} attempted to leave role from message "{msg.content}". '
                 f'Failed because message has {len(msg.role_mentions)} roles mentioned'
             )
             raise UnexpectedDataError(f'Message "{msg.content}" has {len(msg.role_mentions)} roles mentioned')
@@ -90,7 +95,55 @@ class RolesCog(cmd.Cog, name='Roles'):
 
     @cmd.command(name='delete')
     async def delete_mention_group(self, ctx: cmd.Context, *, role:discord.Role):
-        pass
+        if role not in ctx.guild.roles:
+            await ctx.send(f'{role} no longer exists')
+            return
+
+        if role.id in PROTECTED_ROLE_IDS or not role.mentionable:
+            await ctx.send(f'{role} cannot be deleted')
+            return
+
+        mention_ch = ctx.guild.get_channel(MENTION_CH_ID)
+
+        role_join_msg = None
+        async for msg in mention_ch.history():
+            if len(msg.role_mentions) == 1 and msg.role_mentions[0] == role:
+                role_join_msg = msg
+                break
+
+        if not role_join_msg:
+            await ctx.send(f'{role} is not a deletable mention group')
+
+        reaction = (
+            reaction
+            for reaction in role_join_msg.reactions
+            if reaction.emoji == self._join_emoji
+        )
+        reaction = next(reaction, None)
+
+        if reaction:
+            if reaction.count > 1:
+                await ctx.send(f'{role} cannot be deleted while other users are in it')
+                return
+
+            users = await reaction.users().flatten()
+            if any(user != self.bot.user for user in users):
+                await ctx.send(f'{role} cannot be deleted while other users are in it')
+                return
+
+        await role.delete(reason='Bot command')
+        await role_join_msg.delete()
+        await ctx.send('Role deleted successfully!')
+
+    @delete_mention_group.error
+    async def delete_error_handler(self, ctx: cmd.Context, error: cmd.CommandError):
+        if isinstance(error, cmd.BadArgument):
+            await ctx.send(str(error))
+        elif isinstance(error, cmd.MissingRequiredArgument):
+            if error.param.name == 'role':
+                await ctx.send('Must specify a role to delete')
+        else:
+            raise error
 
 
 def setup(bot):
