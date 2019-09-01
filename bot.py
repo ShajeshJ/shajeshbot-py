@@ -1,5 +1,11 @@
-from discord.ext.commands import Bot
+from discord.ext.commands import (
+    Bot,
+    has_permissions,
+    MissingPermissions,
+)
+import discord
 from config import BOT_TOKEN
+from error_templates import missing_perms_template
 
 class ShajeshBot(Bot):
     async def on_ready(self):
@@ -7,8 +13,10 @@ class ShajeshBot(Bot):
 
 bot = ShajeshBot(command_prefix='!')
 
+
 @bot.command('reloadext', hidden=True)
-async def cog_ext(ctx, *, ext:str):
+@has_permissions(administrator=True)
+async def reload_ext(ctx, *, ext:str):
     try:
         bot.reload_extension(ext)
     except Exception as e:
@@ -20,6 +28,13 @@ async def cog_ext(ctx, *, ext:str):
     else:
         print(f'Reloaded {ext}')
         await ctx.send('success')
+
+@reload_ext.error
+async def reload_ext_error_handler(ctx, error):
+    if isinstance(error, MissingPermissions):
+        print(missing_perms_template('reload extension', ctx, error))
+    else:
+        raise error
 
 
 bot.load_extension('cogs.roles')

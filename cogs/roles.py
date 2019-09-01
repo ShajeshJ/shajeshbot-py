@@ -18,11 +18,11 @@ class RolesCog(cmd.Cog, name='Roles'):
 
     @create_mention_group.error
     async def create_error_handler(self, ctx: cmd.Context, error: cmd.CommandError):
-        print(error)
-
         if isinstance(error, cmd.MissingRequiredArgument):
             if error.param.name == 'role_name':
                 await ctx.send('Cannot specify a role with an empty name')
+        else:
+            raise error
 
 
     @cmd.command(name='join')
