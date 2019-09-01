@@ -5,7 +5,7 @@ from discord.ext.commands import (
 )
 import discord
 from config import BOT_TOKEN
-from error_templates import missing_perms_template
+from error import missing_perms_template
 
 class ShajeshBot(Bot):
     async def on_ready(self):
