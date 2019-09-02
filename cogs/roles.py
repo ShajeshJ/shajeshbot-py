@@ -6,6 +6,7 @@ from config import (
     PROTECTED_ROLE_IDS,
 )
 from libraries.error import UnexpectedDataError
+from libraries.checks import is_bot_channel
 
 class RolesCog(cmd.Cog, name='Roles'):
     _join_emoji = '☑'
@@ -15,6 +16,7 @@ class RolesCog(cmd.Cog, name='Roles'):
 
 
     @cmd.command(name='create')
+    @is_bot_channel
     async def create_mention_group(self, ctx: cmd.Context, *, role_name: str):
         if any(role.name.lower() == role_name.lower() for role in ctx.guild.roles):
             await ctx.send(f'Cannot create another group with the name "{role_name}"')
@@ -100,6 +102,7 @@ class RolesCog(cmd.Cog, name='Roles'):
 
 
     @cmd.command(name='delete')
+    @is_bot_channel
     async def delete_mention_group(self, ctx: cmd.Context, *, role:discord.Role):
         if role not in ctx.guild.roles:
             await ctx.send(f'{role} no longer exists')
