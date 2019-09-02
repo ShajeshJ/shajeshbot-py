@@ -5,7 +5,7 @@ from config import (
     ADMIN_ID,
     PROTECTED_ROLE_IDS,
 )
-from error import UnexpectedDataError
+from libraries.error import UnexpectedDataError
 
 class RolesCog(cmd.Cog, name='Roles'):
     _join_emoji = '☑'
