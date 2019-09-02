@@ -1,11 +1,11 @@
 from discord.ext.commands import (
     Bot,
-    has_permissions,
     MissingPermissions,
 )
 import discord
 from config import BOT_TOKEN
 from libraries.error import missing_perms_template
+from libraries.checks import admin_only
 
 class ShajeshBot(Bot):
     async def on_ready(self):
@@ -15,7 +15,7 @@ bot = ShajeshBot(command_prefix='!')
 
 
 @bot.command('reloadext', hidden=True)
-@has_permissions(administrator=True)
+@admin_only
 async def reload_ext(ctx, *, ext:str):
 
     async def try_reload(ext, send_error=False):
