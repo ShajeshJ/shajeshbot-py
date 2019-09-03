@@ -78,7 +78,8 @@ class EmojisCog(cmd.Cog, name='Emoji'):
     @cmd.dm_only()
     async def approve_emoji(self, ctx, *, shortcut: str):
         if shortcut not in self.__pendingEmojis:
-            ctx.send(f'{shortcut} does not correspond to an active emoji request.')
+            await ctx.send(f'{shortcut} does not correspond to an active emoji request.')
+            return
 
         guild = self.bot.get_guild(GUILD_ID)
 
@@ -90,7 +91,7 @@ class EmojisCog(cmd.Cog, name='Emoji'):
             with urlopen(url) as conn:
                 image = conn.read()
         except:
-            ctx.send(f'Failed to download the emoji image from {url}')
+            await ctx.send(f'Failed to download the emoji image from {url}')
             return
 
         emoji = await guild.create_custom_emoji(shortcut, image)
@@ -121,7 +122,8 @@ class EmojisCog(cmd.Cog, name='Emoji'):
     @cmd.dm_only()
     async def reject_emoji(self, ctx, shortcut: str, *, reason:str):
         if shortcut not in self.__pendingEmojis:
-            ctx.send(f'{shortcut} does not correspond to an active emoji request.')
+            await ctx.send(f'{shortcut} does not correspond to an active emoji request.')
+            return
 
         guild = self.bot.get_guild(GUILD_ID)
 
@@ -131,10 +133,10 @@ class EmojisCog(cmd.Cog, name='Emoji'):
         del self.__pendingEmojis[shortcut]
 
         user = guild.get_member(user_id)
-        bot_channel = guild.get_channel(BOT_CH_ID)
+        bot_channel: discord.TextChannel = guild.get_channel(BOT_CH_ID)
         embed = discord.Embed(title='Reason', description=reason)
 
-        await bot_channel.send(f'{user.mention} your emoji {shortcut} was rejectetd {url}', embed)
+        await bot_channel.send(content=f'{user.mention} your emoji {shortcut} was rejected {url}', embed=embed)
 
     @reject_emoji.error
     async def reject_emoji_error_handler(self, ctx, error):
@@ -142,7 +144,9 @@ class EmojisCog(cmd.Cog, name='Emoji'):
             await ctx.send(str(error))
         elif isinstance(error, cmd.MissingRequiredArgument):
             if error.param.name == 'shortcut':
-                await ctx.send('Must specify the shortcut to add')
+                await ctx.send('Must specify the shortcut to reject')
+            elif error.param.name == 'reason':
+                await ctx.send('Must specify a reason to reject the shortcut')
         elif isinstance(error, AdminOnlyError):
             print(str(error))
         elif isinstance(error, cmd.PrivateMessageOnly):
@@ -158,8 +162,8 @@ class EmojisCog(cmd.Cog, name='Emoji'):
         if len(self.__pendingEmojis) == 0:
             await ctx.send('There are no currently pending emojis')
         else:
-            for request in self.__pendingEmojis:
-                await ctx.send(f'{request["shortcut"]}: {request["url"]}')
+            for k, v in self.__pendingEmojis.items():
+                await ctx.send(f'{v["shortcut"]}: {v["url"]}')
 
     @list_emojis.error
     async def list_emojis_error_handler(self, ctx, error):
