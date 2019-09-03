@@ -4,18 +4,22 @@ from discord.ext.commands import (
 )
 import discord
 from config import BOT_TOKEN
-from libraries.error import missing_perms_template
+from libraries.error import (
+    missing_perms_template,
+    AdminOnlyError,
+)
 from libraries.checks import admin_only
 
 class ShajeshBot(Bot):
     async def on_ready(self):
         print(f'Logged on as {self.user}')
 
+
 bot = ShajeshBot(command_prefix='!')
 
 
 @bot.command('reloadext', hidden=True)
-@admin_only
+@admin_only()
 async def reload_ext(ctx, *, ext:str):
 
     async def try_reload(ext, send_error=False):
@@ -41,6 +45,8 @@ async def reload_ext(ctx, *, ext:str):
 async def reload_ext_error_handler(ctx, error):
     if isinstance(error, MissingPermissions):
         print(missing_perms_template('reload extension', ctx, error))
+    elif isinstance(error, AdminOnlyError):
+        print(str(error))
     else:
         raise error
 

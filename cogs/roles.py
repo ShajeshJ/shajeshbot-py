@@ -5,7 +5,7 @@ from config import (
     ADMIN_ID,
     PROTECTED_ROLE_IDS,
 )
-from libraries.error import UnexpectedDataError
+from libraries.error import UnexpectedDataError, BotChannelError
 from libraries.checks import is_bot_channel
 
 class RolesCog(cmd.Cog, name='Roles'):
@@ -16,8 +16,8 @@ class RolesCog(cmd.Cog, name='Roles'):
 
 
     @cmd.command(name='create')
-    @is_bot_channel
-    async def create_mention_group(self, ctx: cmd.Context, *, role_name: str):
+    @is_bot_channel()
+    async def create_mention_group(self, ctx, *, role_name: str):
         if any(role.name.lower() == role_name.lower() for role in ctx.guild.roles):
             await ctx.send(f'Cannot create another group with the name "{role_name}"')
             return
@@ -31,10 +31,12 @@ class RolesCog(cmd.Cog, name='Roles'):
         await ctx.send(f'"{role_name}" created successfully')
 
     @create_mention_group.error
-    async def create_error_handler(self, ctx: cmd.Context, error: cmd.CommandError):
+    async def create_error_handler(self, ctx, error):
         if isinstance(error, cmd.MissingRequiredArgument):
             if error.param.name == 'role_name':
                 await ctx.send('Cannot specify a role with an empty name')
+        elif isinstance(error, BotChannelError):
+            pass
         else:
             raise error
 
@@ -102,8 +104,8 @@ class RolesCog(cmd.Cog, name='Roles'):
 
 
     @cmd.command(name='delete')
-    @is_bot_channel
-    async def delete_mention_group(self, ctx: cmd.Context, *, role:discord.Role):
+    @is_bot_channel()
+    async def delete_mention_group(self, ctx, *, role:discord.Role):
         if role not in ctx.guild.roles:
             await ctx.send(f'{role} no longer exists')
             return
@@ -145,12 +147,14 @@ class RolesCog(cmd.Cog, name='Roles'):
         await ctx.send('Role deleted successfully!')
 
     @delete_mention_group.error
-    async def delete_error_handler(self, ctx: cmd.Context, error: cmd.CommandError):
+    async def delete_error_handler(self, ctx, error):
         if isinstance(error, cmd.BadArgument):
             await ctx.send(str(error))
         elif isinstance(error, cmd.MissingRequiredArgument):
             if error.param.name == 'role':
                 await ctx.send('Must specify a role to delete')
+        elif isinstance(error, BotChannelError):
+            pass
         else:
             raise error
 
