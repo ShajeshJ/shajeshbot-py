@@ -1,6 +1,7 @@
 from typing import Optional
 import re
-from urllib.request import urlopen
+import requests
+from io import BytesIO
 
 import discord
 import discord.ext.commands as cmd
@@ -87,19 +88,41 @@ class EmojisCog(cmd.Cog, name='Emoji'):
         url = emoji_request['url']
         user_id = emoji_request['user_id']
 
-        try:
-            with urlopen(url) as conn:
-                image = conn.read()
-        except:
-            await ctx.send(f'Failed to download the emoji image from {url}')
-            return
-
-        emoji = await guild.create_custom_emoji(shortcut, image)
-        del self.__pendingEmojis[shortcut]
-
+        user = guild.get_member(user_id)
         bot_channel = guild.get_channel(BOT_CH_ID)
 
-        msg = await bot_channel.send(f'Emoji {shortcut} added successfully')
+        try:
+            img_content = requests.get(url).content
+            image = BytesIO(img_content).getvalue()
+        except:
+            await ctx.send(f'Failed to download the emoji image from {url}')
+            await bot_channel.send(
+                f'{user.mention} the emoji "{shortcut}" could not be approved'\
+                ' because the image failed to download.'
+            )
+            return
+
+        try:
+            emoji = await guild.create_custom_emoji(name=shortcut, image=image)
+        except discord.errors.HTTPException as e:
+            print(f'HTTP Status: {e.status} - Error Code: {e.code} - Error Response: {e.text}')
+            await ctx.send(f'Failed to uploaded the emoji image {url} because it because it\'s too large')
+            await bot_channel.send(
+                f'{user.mention} the emoji "{shortcut}" could not be uploaded'\
+                f' because the image {url} is larger than 256 kb.'
+            )
+            return
+        except discord.errors.InvalidArgument as e:
+            print(str(e))
+            await bot_channel.send(
+                f'{user.mention} the emoji "{shortcut}" could not be approved'\
+                f' because the uploaded file {url} was not a valid image'
+            )
+            return
+        finally:
+            del self.__pendingEmojis[shortcut]
+
+        msg = await bot_channel.send(f'Emoji "{shortcut}" added successfully')
         await msg.add_reaction(emoji)
 
     @approve_emoji.error
@@ -133,10 +156,10 @@ class EmojisCog(cmd.Cog, name='Emoji'):
         del self.__pendingEmojis[shortcut]
 
         user = guild.get_member(user_id)
-        bot_channel: discord.TextChannel = guild.get_channel(BOT_CH_ID)
+        bot_channel = guild.get_channel(BOT_CH_ID)
         embed = discord.Embed(title='Reason', description=reason)
 
-        await bot_channel.send(content=f'{user.mention} your emoji {shortcut} was rejected {url}', embed=embed)
+        await bot_channel.send(content=f'{user.mention} your emoji "{shortcut}" was rejected {url}', embed=embed)
 
     @reject_emoji.error
     async def reject_emoji_error_handler(self, ctx, error):
