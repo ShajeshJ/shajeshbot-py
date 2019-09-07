@@ -23,6 +23,8 @@ class EmojisCog(cmd.Cog):
     @cmd.command(name='emoji')
     @is_bot_channel()
     async def request_emoji(self, ctx, *, shortcut: str):
+        shortcut = shortcut.lower()
+
         if not self._is_alphanumeric(shortcut):
             await ctx.send(
                 f'"{shortcut}" is not a valid shortcut. '
@@ -30,13 +32,13 @@ class EmojisCog(cmd.Cog):
             )
             return
 
-        if any(emoji.name == shortcut for emoji in ctx.guild.emojis):
+        if any(emoji.name.lower() == shortcut for emoji in ctx.guild.emojis):
             await ctx.send(f'"{shortcut}" has already been taken')
             return
 
         is_add_request = True
 
-        if shortcut in self.__pendingEmojis:
+        if shortcut in self.__pendingEmojis.keys():
             if self.__pendingEmojis[shortcut]['user_id'] != ctx.author.id:
                 await ctx.send(f'"{shortcut}" is an already pending shortcut')
                 return
@@ -48,12 +50,11 @@ class EmojisCog(cmd.Cog):
             return
 
         url = ctx.message.attachments[0].url
-        user_id = ctx.author.id
 
         self.__pendingEmojis[shortcut] = {
             'shortcut': shortcut,
             'url': url,
-            'user_id': user_id
+            'user': ctx.author
         }
 
         admin = ctx.guild.get_member(ADMIN_ID)
@@ -70,7 +71,7 @@ class EmojisCog(cmd.Cog):
             await ctx.send(str(error))
         elif isinstance(error, cmd.MissingRequiredArgument):
             if error.param.name == 'shortcut':
-                await ctx.send('Must specify the shortcut to add')
+                await ctx.send('Must specify the shortcut to use')
         else:
             await self.bot.handle_error(error)
 
@@ -87,9 +88,7 @@ class EmojisCog(cmd.Cog):
 
         emoji_request = self.__pendingEmojis[shortcut]
         url = emoji_request['url']
-        user_id = emoji_request['user_id']
-
-        user = guild.get_member(user_id)
+        user = emoji_request['user']
         bot_channel = guild.get_channel(BOT_CH_ID)
 
         try:
@@ -148,11 +147,10 @@ class EmojisCog(cmd.Cog):
         guild = self.bot.get_guild(GUILD_ID)
 
         url = self.__pendingEmojis[shortcut]['url']
-        user_id = self.__pendingEmojis[shortcut]['user_id']
+        user = self.__pendingEmojis[shortcut]['user']
 
         del self.__pendingEmojis[shortcut]
 
-        user = guild.get_member(user_id)
         bot_channel = guild.get_channel(BOT_CH_ID)
         embed = discord.Embed(title='Reason', description=reason)
 
