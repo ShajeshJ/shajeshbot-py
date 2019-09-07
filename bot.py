@@ -1,58 +1,41 @@
-from discord.ext.commands import (
-    Bot,
-    MissingPermissions,
-)
+from discord.ext.commands import Bot, PrivateMessageOnly
 import discord
-from config import BOT_TOKEN
 from libraries.error import (
-    missing_perms_template,
     AdminOnlyError,
+    BotChannelError
 )
-from libraries.checks import admin_only
+import traceback
+import sys
 
 class ShajeshBot(Bot):
+    __common_errors = (
+        BotChannelError,
+        PrivateMessageOnly,
+        AdminOnlyError
+    )
+
     async def on_ready(self):
         print(f'Logged on as {self.user}')
 
 
-bot = ShajeshBot(command_prefix='!')
-
-
-@bot.command('reloadext', hidden=True)
-@admin_only()
-async def reload_ext(ctx, *, ext:str):
-
-    async def try_reload(ext, send_error=False):
-        try:
-            bot.reload_extension(ext)
-        except:
-            if send_error:
-                print(f'**ERROR** {type(e).__name__} - {e}')
-                await ctx.send('fail')
-            return False
+    # Is called for ALL commands, regardless of if there is a local exception handler
+    async def on_command_error(self, context, exception):
+        if isinstance(exception, self.__common_errors):
+            self.__handle_common_errors(exception)
         else:
-            print(f'Reloaded {ext}')
-            await ctx.send('success')
-            return True
-
-    if await try_reload(ext):
-        return
-
-    await try_reload('cogs.' + ext, True)
+            await super().on_command_error(context, exception)
 
 
-@reload_ext.error
-async def reload_ext_error_handler(ctx, error):
-    if isinstance(error, MissingPermissions):
-        print(missing_perms_template('reload extension', ctx, error))
-    elif isinstance(error, AdminOnlyError):
-        print(str(error))
-    else:
-        raise error
+    # Function that we should call as last resort in local exception handlers
+    async def handle_error(self, exception):
+        if not isinstance(exception, self.__common_errors):
+            traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
 
 
-bot.load_extension('cogs.roles')
-bot.load_extension('cogs.emojis')
-
-if __name__ == "__main__":
-    bot.run(BOT_TOKEN)
+    def __handle_common_errors(self, exception):
+        if isinstance(exception, BotChannelError):
+            pass
+        elif isinstance(exception, PrivateMessageOnly):
+            pass
+        elif isinstance(exception, AdminOnlyError):
+            print(str(exception))

@@ -5,10 +5,13 @@ from config import (
     ADMIN_ID,
     PROTECTED_ROLE_IDS,
 )
-from libraries.error import UnexpectedDataError, BotChannelError
+from libraries.error import (
+    UnexpectedDataError,
+    BotChannelError,
+)
 from libraries.checks import is_bot_channel
 
-class RolesCog(cmd.Cog, name='Roles'):
+class RolesCog(cmd.Cog):
     _join_emoji = '☑'
 
     def __init__(self, bot):
@@ -35,10 +38,8 @@ class RolesCog(cmd.Cog, name='Roles'):
         if isinstance(error, cmd.MissingRequiredArgument):
             if error.param.name == 'role_name':
                 await ctx.send('Cannot specify a role with an empty name')
-        elif isinstance(error, BotChannelError):
-            pass
         else:
-            raise error
+            await self.bot.handle_error(error)
 
 
     @cmd.Cog.listener(name='on_reaction_add')
@@ -153,10 +154,8 @@ class RolesCog(cmd.Cog, name='Roles'):
         elif isinstance(error, cmd.MissingRequiredArgument):
             if error.param.name == 'role':
                 await ctx.send('Must specify a role to delete')
-        elif isinstance(error, BotChannelError):
-            pass
         else:
-            raise error
+            await self.bot.handle_error(error)
 
 
 def setup(bot):

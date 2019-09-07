@@ -7,10 +7,13 @@ import discord
 import discord.ext.commands as cmd
 
 from libraries.checks import is_bot_channel, admin_only
-from libraries.error import BotChannelError, AdminOnlyError
+from libraries.error import (
+    BotChannelError,
+    AdminOnlyError,
+)
 from config import ADMIN_ID, GUILD_ID, BOT_CH_ID
 
-class EmojisCog(cmd.Cog, name='Emoji'):
+class EmojisCog(cmd.Cog):
     __pendingEmojis = {}
 
     def __init__(self, bot):
@@ -68,10 +71,8 @@ class EmojisCog(cmd.Cog, name='Emoji'):
         elif isinstance(error, cmd.MissingRequiredArgument):
             if error.param.name == 'shortcut':
                 await ctx.send('Must specify the shortcut to add')
-        elif isinstance(error, BotChannelError):
-            pass
         else:
-            raise error
+            await self.bot.handle_error(error)
 
 
     @cmd.command(name='acceptemoji')
@@ -132,12 +133,8 @@ class EmojisCog(cmd.Cog, name='Emoji'):
         elif isinstance(error, cmd.MissingRequiredArgument):
             if error.param.name == 'shortcut':
                 await ctx.send('Must specify the shortcut to add')
-        elif isinstance(error, AdminOnlyError):
-            print(str(error))
-        elif isinstance(error, cmd.PrivateMessageOnly):
-            pass
         else:
-            raise error
+            await self.bot.handle_error(error)
 
 
     @cmd.command(name='rejectemoji')
@@ -170,12 +167,8 @@ class EmojisCog(cmd.Cog, name='Emoji'):
                 await ctx.send('Must specify the shortcut to reject')
             elif error.param.name == 'reason':
                 await ctx.send('Must specify a reason to reject the shortcut')
-        elif isinstance(error, AdminOnlyError):
-            print(str(error))
-        elif isinstance(error, cmd.PrivateMessageOnly):
-            pass
         else:
-            raise error
+            await self.bot.handle_error(error)
 
 
     @cmd.command(name='listemojis')
@@ -187,15 +180,6 @@ class EmojisCog(cmd.Cog, name='Emoji'):
         else:
             for k, v in self.__pendingEmojis.items():
                 await ctx.send(f'{v["shortcut"]}: {v["url"]}')
-
-    @list_emojis.error
-    async def list_emojis_error_handler(self, ctx, error):
-        if isinstance(error, AdminOnlyError):
-            print(str(error))
-        elif isinstance(error, cmd.PrivateMessageOnly):
-            pass
-        else:
-            raise error
 
 
     @staticmethod
