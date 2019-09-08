@@ -74,7 +74,7 @@ class EmojisCog(cmd.Cog):
             await self.bot.handle_error(ctx, error)
 
 
-    @cmd.command(name='acceptemoji')
+    @cmd.command(name='approveemoji')
     @admin_only()
     @cmd.dm_only()
     async def approve_emoji(self, ctx, *, shortcut: str):
@@ -83,11 +83,10 @@ class EmojisCog(cmd.Cog):
             return
 
         guild = self.bot.get_guild(GUILD_ID)
-
-        emoji_request = self.__pendingEmojis[shortcut]
-        url = emoji_request['url']
-        user = emoji_request['user']
         bot_channel = guild.get_channel(BOT_CH_ID)
+
+        url = self.__pendingEmojis[shortcut]['url']
+        user = self.__pendingEmojis[shortcut]['user']
 
         try:
             img_content = requests.get(url).content
@@ -104,7 +103,7 @@ class EmojisCog(cmd.Cog):
             emoji = await guild.create_custom_emoji(name=shortcut, image=image)
         except discord.errors.HTTPException as e:
             print(f'HTTP Status: {e.status} - Error Code: {e.code} - Error Response: {e.text}')
-            await ctx.send(f'Failed to uploaded the emoji image {url} because it because it\'s too large')
+            await ctx.send(f'Failed to uploaded the emoji image {url} because it\'s too large')
             await bot_channel.send(
                 f'{user.mention} the emoji "{shortcut}" could not be uploaded'\
                 f' because the image {url} is larger than 256 kb.'
@@ -141,15 +140,14 @@ class EmojisCog(cmd.Cog):
             return
 
         guild = self.bot.get_guild(GUILD_ID)
+        bot_channel = guild.get_channel(BOT_CH_ID)
 
         url = self.__pendingEmojis[shortcut]['url']
         user = self.__pendingEmojis[shortcut]['user']
 
         del self.__pendingEmojis[shortcut]
 
-        bot_channel = guild.get_channel(BOT_CH_ID)
         embed = discord.Embed(title='Reason', description=reason)
-
         await bot_channel.send(content=f'{user.mention} your emoji "{shortcut}" was rejected {url}', embed=embed)
 
     @reject_emoji.error

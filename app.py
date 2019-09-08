@@ -7,6 +7,7 @@ from libraries.checks import admin_only
 bot = ShajeshBot(command_prefix='!')
 bot.load_extension('cogs.roles')
 bot.load_extension('cogs.emojis')
+bot.load_extension('cogs.channel')
 
 
 @bot.command('reloadext', hidden=True)

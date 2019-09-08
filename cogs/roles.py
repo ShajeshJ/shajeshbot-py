@@ -18,7 +18,7 @@ class RolesCog(cmd.Cog):
         self.bot = bot
 
 
-    @cmd.command(name='create')
+    @cmd.command(name='creategroup')
     @is_bot_channel()
     async def create_mention_group(self, ctx, *, role_name: str):
         if any(role.name.lower() == role_name.lower() for role in ctx.guild.roles):
@@ -104,7 +104,7 @@ class RolesCog(cmd.Cog):
         await user.remove_roles(role, reason='Bot command', atomic=True)
 
 
-    @cmd.command(name='delete')
+    @cmd.command(name='deletegroup')
     @is_bot_channel()
     async def delete_mention_group(self, ctx, *, role:discord.Role):
         if role not in ctx.guild.roles:
