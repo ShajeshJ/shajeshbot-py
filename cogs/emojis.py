@@ -1,4 +1,3 @@
-from typing import Optional
 import re
 import requests
 from io import BytesIO

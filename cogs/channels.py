@@ -1,6 +1,5 @@
 import discord.ext.commands as cmd
 import discord
-from typing import Optional
 import re
 
 from libraries.checks import is_bot_channel, admin_only
