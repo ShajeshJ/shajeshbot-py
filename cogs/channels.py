@@ -13,10 +13,10 @@ class ChannelsCog(cmd.Cog):
         self.bot = bot
 
 
-    @cmd.command(name='channel', ignore_extra=False)
+    @cmd.command(name='channel')
     @is_bot_channel()
     async def request_channel(self, ctx, channel: str, *,
-            category: Optional[discord.CategoryChannel]):
+            category: discord.CategoryChannel = None):
         channel = channel.lower()
 
         if not self._valid_channel_name(channel):
@@ -53,8 +53,6 @@ class ChannelsCog(cmd.Cog):
         if isinstance(error, cmd.MissingRequiredArgument):
             if error.param.name == 'channel':
                 await ctx.send('Must specify the channel name')
-        elif isinstance(error, cmd.TooManyArguments):
-            await ctx.send(f'You entered an invalid category name')
         else:
             await self.bot.handle_error(ctx, error)
 
