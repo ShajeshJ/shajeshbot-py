@@ -67,13 +67,11 @@ class EmojisCog(cmd.Cog):
 
     @request_emoji.error
     async def emoji_error_handler(self, ctx, error):
-        if isinstance(error, cmd.BadArgument):
-            await ctx.send(str(error))
-        elif isinstance(error, cmd.MissingRequiredArgument):
+        if isinstance(error, cmd.MissingRequiredArgument):
             if error.param.name == 'shortcut':
                 await ctx.send('Must specify the shortcut to use')
         else:
-            await self.bot.handle_error(error)
+            await self.bot.handle_error(ctx, error)
 
 
     @cmd.command(name='acceptemoji')
@@ -127,13 +125,11 @@ class EmojisCog(cmd.Cog):
 
     @approve_emoji.error
     async def approve_emoji_error_handler(self, ctx, error):
-        if isinstance(error, cmd.BadArgument):
-            await ctx.send(str(error))
-        elif isinstance(error, cmd.MissingRequiredArgument):
+        if isinstance(error, cmd.MissingRequiredArgument):
             if error.param.name == 'shortcut':
                 await ctx.send('Must specify the shortcut to add')
         else:
-            await self.bot.handle_error(error)
+            await self.bot.handle_error(ctx, error)
 
 
     @cmd.command(name='rejectemoji')
@@ -158,15 +154,13 @@ class EmojisCog(cmd.Cog):
 
     @reject_emoji.error
     async def reject_emoji_error_handler(self, ctx, error):
-        if isinstance(error, cmd.BadArgument):
-            await ctx.send(str(error))
-        elif isinstance(error, cmd.MissingRequiredArgument):
+        if isinstance(error, cmd.MissingRequiredArgument):
             if error.param.name == 'shortcut':
                 await ctx.send('Must specify the shortcut to reject')
             elif error.param.name == 'reason':
                 await ctx.send('Must specify a reason to reject the shortcut')
         else:
-            await self.bot.handle_error(error)
+            await self.bot.handle_error(ctx, error)
 
 
     @cmd.command(name='listemojis')

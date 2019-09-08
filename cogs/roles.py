@@ -39,7 +39,7 @@ class RolesCog(cmd.Cog):
             if error.param.name == 'role_name':
                 await ctx.send('Cannot specify a role with an empty name')
         else:
-            await self.bot.handle_error(error)
+            await self.bot.handle_error(ctx, error)
 
 
     @cmd.Cog.listener(name='on_reaction_add')
@@ -149,13 +149,11 @@ class RolesCog(cmd.Cog):
 
     @delete_mention_group.error
     async def delete_error_handler(self, ctx, error):
-        if isinstance(error, cmd.BadArgument):
-            await ctx.send(str(error))
-        elif isinstance(error, cmd.MissingRequiredArgument):
+        if isinstance(error, cmd.MissingRequiredArgument):
             if error.param.name == 'role':
                 await ctx.send('Must specify a role to delete')
         else:
-            await self.bot.handle_error(error)
+            await self.bot.handle_error(ctx, error)
 
 
 def setup(bot):

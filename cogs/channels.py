@@ -50,13 +50,11 @@ class ChannelsCog(cmd.Cog):
 
     @request_channel.error
     async def channel_error_handler(self, ctx, error):
-        if isinstance(error, cmd.BadArgument):
-            await ctx.send(str(error))
-        elif isinstance(error, cmd.MissingRequiredArgument):
+        if isinstance(error, cmd.MissingRequiredArgument):
             if error.param.name == 'channel':
                 await ctx.send('Must specify the channel name')
         else:
-            await self.bot.handle_error(error)
+            await self.bot.handle_error(ctx, error)
 
 
     @staticmethod
