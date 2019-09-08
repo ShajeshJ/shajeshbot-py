@@ -1,13 +1,22 @@
 from bot import ShajeshBot
 from config import BOT_TOKEN
 from libraries.checks import admin_only
+import os
+import traceback
 
 #invite https://discordapp.com/oauth2/authorize?client_id=421836036101111818&scope=bot&permissions=1610087545
 
 bot = ShajeshBot(command_prefix='!')
-bot.load_extension('cogs.roles')
-bot.load_extension('cogs.emojis')
-bot.load_extension('cogs.channel')
+
+unloaded_files = []
+for filename in os.listdir('cogs'):
+    if filename.endswith('.py'):
+        try:
+            bot.load_extension(f'cogs.{filename[:-3]}')
+        except:
+            unloaded_files.append(filename)
+            traceback.print_exc()
+print(f'Failed to load the following extension files: {", ".join(unloaded_files)}')
 
 
 @bot.command('reloadext', hidden=True)

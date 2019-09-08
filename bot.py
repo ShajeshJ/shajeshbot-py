@@ -45,5 +45,5 @@ class ShajeshBot(Bot):
             pass
         elif isinstance(exception, AdminOnlyError):
             print(str(exception))
-        elif isinstance(error, cmd.BadArgument):
+        elif isinstance(exception, BadArgument):
             await context.send(str(exception))
