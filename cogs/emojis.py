@@ -120,6 +120,7 @@ class EmojisCog(cmd.Cog):
             del self.__pendingEmojis[shortcut]
 
         msg = await bot_channel.send(f'Emoji "{shortcut}" added successfully')
+        await ctx.send('Emoji added successfully')
         await msg.add_reaction(emoji)
 
     @approve_emoji.error
@@ -149,6 +150,7 @@ class EmojisCog(cmd.Cog):
 
         embed = discord.Embed(title='Reason', description=reason)
         await bot_channel.send(content=f'{user.mention} your emoji "{shortcut}" was rejected {url}', embed=embed)
+        await ctx.send('Emoji rejected successfully')
 
     @reject_emoji.error
     async def reject_emoji_error_handler(self, ctx, error):

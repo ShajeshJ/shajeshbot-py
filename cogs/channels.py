@@ -1,6 +1,7 @@
 import discord.ext.commands as cmd
 import discord
 from typing import Optional
+import re
 
 from libraries.checks import is_bot_channel, admin_only
 from config import ADMIN_ID, BOT_CH_ID, GUILD_ID
@@ -12,10 +13,10 @@ class ChannelsCog(cmd.Cog):
         self.bot = bot
 
 
-    @cmd.command(name='channel')
+    @cmd.command(name='channel', ignore_extra=False)
     @is_bot_channel()
-    async def request_channel(self, ctx, channel: str,
-            *, category: Optional[discord.CategoryChannel]):
+    async def request_channel(self, ctx, channel: str, *,
+            category: Optional[discord.CategoryChannel]):
         channel = channel.lower()
 
         if not self._valid_channel_name(channel):
@@ -40,7 +41,7 @@ class ChannelsCog(cmd.Cog):
         }
 
         msg_to_send = f'{ctx.author} requested a text channel "{channel}"'
-        if not category:
+        if category:
             msg_to_send = msg_to_send + f' in the {category.name} category'
 
         admin = ctx.guild.get_member(ADMIN_ID)
@@ -52,6 +53,8 @@ class ChannelsCog(cmd.Cog):
         if isinstance(error, cmd.MissingRequiredArgument):
             if error.param.name == 'channel':
                 await ctx.send('Must specify the channel name')
+        elif isinstance(error, cmd.TooManyArguments):
+            await ctx.send(f'You entered an invalid category name')
         else:
             await self.bot.handle_error(ctx, error)
 
@@ -65,15 +68,15 @@ class ChannelsCog(cmd.Cog):
             return
 
         guild = self.bot.get_guild(GUILD_ID)
-        channel_request = self.__pendingChs['channel']
-        category = channel_request['category']
-        user = channel_request['user']
+        category = self.__pendingChs[channel]['category']
+        user = self.__pendingChs[channel]['user']
 
-        channel = await guild.create_text_channel(channel, category=category)
+        text_ch = await guild.create_text_channel(channel, category=category)
 
         del self.__pendingChs[channel]
 
-        await channel.send(f'{user.mention} your requested channel has been created.')
+        await text_ch.send(f'{user.mention} your requested channel has been created.')
+        await ctx.send('Channel added successfully')
 
     @approve_channel.error
     async def approve_channel_error_handler(self, ctx, error):
@@ -95,12 +98,13 @@ class ChannelsCog(cmd.Cog):
         guild = self.bot.get_guild(GUILD_ID)
         bot_channel = guild.get_channel(BOT_CH_ID)
 
-        user = self.__pendingEmojis[channel]['user']
+        user = self.__pendingChs[channel]['user']
 
         del self.__pendingChs[channel]
 
         embed = discord.Embed(title='Reason', description=reason)
         await bot_channel.send(content=f'{user.mention} your channel "{channel}" was rejected', embed=embed)
+        await ctx.send('Channel rejected successfully')
 
     @reject_channel.error
     async def reject_channel_error_handler(self, ctx, error):
@@ -128,3 +132,7 @@ class ChannelsCog(cmd.Cog):
     @staticmethod
     def _valid_channel_name(string: str):
         return re.fullmatch('[a-zA-Z0-9_\\-]+', string)
+
+
+def setup(bot):
+    bot.add_cog(ChannelsCog(bot))
