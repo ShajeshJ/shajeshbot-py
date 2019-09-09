@@ -50,7 +50,7 @@ class RolesCog(cmd.Cog):
         if payload.channel_id != MENTION_CH_ID:
             return
 
-        if payload.emoji != self._join_emoji:
+        if payload.emoji.name != self._join_emoji:
             return
 
         mention_ch = self.bot.get_channel(payload.channel_id)
@@ -67,7 +67,7 @@ class RolesCog(cmd.Cog):
             raise UnexpectedDataError(f'Message "{msg.content}" has {len(msg.role_mentions)} roles mentioned')
 
         role = msg.role_mentions[0]
-        
+
         if role in user.roles:
             return
 
@@ -85,7 +85,7 @@ class RolesCog(cmd.Cog):
         if payload.channel_id != MENTION_CH_ID:
             return
 
-        if payload.emoji != self._join_emoji:
+        if payload.emoji.name != self._join_emoji:
             return
 
         mention_ch = self.bot.get_channel(payload.channel_id)
@@ -102,7 +102,7 @@ class RolesCog(cmd.Cog):
             raise UnexpectedDataError(f'Message "{msg.content}" has {len(msg.role_mentions)} roles mentioned')
 
         role = msg.role_mentions[0]
-        
+
         if role not in user.roles:
             return
 
