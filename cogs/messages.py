@@ -101,6 +101,9 @@ class MessagesCogs(cmd.Cog):
 
             await message.channel.send('', embed=embed)
 
+            # Only quote one at a time for now
+            break
+
 
 def setup(bot):
     bot.add_cog(MessagesCogs(bot))
