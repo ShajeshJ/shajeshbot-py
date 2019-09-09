@@ -16,7 +16,8 @@ for filename in os.listdir('cogs'):
         except:
             unloaded_files.append(filename)
             traceback.print_exc()
-print(f'Failed to load the following extension files: {", ".join(unloaded_files)}')
+if not unloaded_files:
+    print(f'Failed to load the following extension files: {", ".join(unloaded_files)}')
 
 
 @bot.command('reloadext', hidden=True)

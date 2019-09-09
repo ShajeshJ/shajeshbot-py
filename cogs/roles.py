@@ -42,20 +42,24 @@ class RolesCog(cmd.Cog):
             await self.bot.handle_error(ctx, error)
 
 
-    @cmd.Cog.listener(name='on_reaction_add')
-    async def join_mention_group(self, reaction, user):
-        if user == self.bot.user:
+    @cmd.Cog.listener(name='on_raw_reaction_add')
+    async def join_mention_group(self, payload):
+        if payload.user_id == self.bot.user.id:
             return
 
-        msg = reaction.message
-        if msg.channel.id != MENTION_CH_ID:
+        if payload.channel_id != MENTION_CH_ID:
             return
 
-        if reaction.emoji != self._join_emoji:
+        if payload.emoji != self._join_emoji:
             return
+
+        mention_ch = self.bot.get_channel(payload.channel_id)
+        guild = mention_ch.guild
+        user = guild.get_member(payload.user_id)
+        msg = await mention_ch.fetch_message(payload.message_id)
 
         if len(msg.role_mentions) != 1:
-            admin = user.guild.get_member(ADMIN_ID)
+            admin = guild.get_member(ADMIN_ID)
             await admin.send(
                 f'{user} attempted to join role from message "{msg.content}". '
                 f'Failed because message has {len(msg.role_mentions)} roles mentioned'
@@ -73,20 +77,24 @@ class RolesCog(cmd.Cog):
         await user.add_roles(role, reason='Bot command', atomic=True)
 
 
-    @cmd.Cog.listener(name='on_reaction_remove')
-    async def leave_mention_group(self, reaction, user):
-        if user == self.bot.user:
+    @cmd.Cog.listener(name='on_raw_reaction_remove')
+    async def leave_mention_group(self, payload):
+        if payload.user_id == self.bot.user.id:
             return
 
-        msg = reaction.message
-        if msg.channel.id != MENTION_CH_ID:
+        if payload.channel_id != MENTION_CH_ID:
             return
 
-        if reaction.emoji != self._join_emoji:
+        if payload.emoji != self._join_emoji:
             return
+
+        mention_ch = self.bot.get_channel(payload.channel_id)
+        guild = mention_ch.guild
+        user = guild.get_member(payload.user_id)
+        msg = await mention_ch.fetch_message(payload.message_id)
 
         if len(msg.role_mentions) != 1:
-            admin = user.guild.get_member(ADMIN_ID)
+            admin = guild.get_member(ADMIN_ID)
             await admin.send(
                 f'{user} attempted to leave role from message "{msg.content}". '
                 f'Failed because message has {len(msg.role_mentions)} roles mentioned'
