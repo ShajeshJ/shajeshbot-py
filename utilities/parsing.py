@@ -11,6 +11,15 @@ dice_regex = (
     ')?'
 )
 
+# Try to match discord message link
+discord_msg_url_regex = (
+    'https?:\\/\\/discordapp\\.com\\/channels\\/'
+    '(?P<g_id>[0-9]+)\\/'
+    '(?P<c_id>[0-9]+)\\/'
+    '(?P<m_id>[0-9]+)'
+)
+
+
 def parse_dice_args(argument) -> dict:
     dice_args = {}
 
@@ -73,3 +82,15 @@ def parse_dice_args(argument) -> dict:
         )
 
     return dice_args
+
+
+def extract_discord_msg_urls(content: str):
+    msg_urls = []
+    for url in re.finditer(discord_msg_url_regex, content):
+        msg_urls.append({
+            'guild_id': int(url.group('g_id')),
+            'channel_id': int(url.group('c_id')),
+            'message_id': int(url.group('m_id')),
+            'original': url.group(0)
+        })
+    return msg_urls

@@ -16,7 +16,7 @@ for filename in os.listdir('cogs'):
         except:
             unloaded_files.append(filename)
             traceback.print_exc()
-if not unloaded_files:
+if unloaded_files:
     print(f'Failed to load the following extension files: {", ".join(unloaded_files)}')
 
 

@@ -1,7 +1,9 @@
 import random
+import discord
 import discord.ext.commands as cmd
 from libraries.checks import is_bot_channel
-from utilities.dice_parsing import parse_dice_args
+from utilities.parsing import parse_dice_args, extract_discord_msg_urls
+from config import GUILD_ID
 
 class MessagesCogs(cmd.Cog):
     def __init__(self, bot):
@@ -49,6 +51,55 @@ class MessagesCogs(cmd.Cog):
                 await ctx.send('Must specify input parameters')
         else:
             await self.bot.handle_error(ctx, error)
+
+
+    @cmd.Cog.listener(name='on_message')
+    async def create_quoted_msgs(self, message):
+        msg_urls = extract_discord_msg_urls(message.content)
+        guild = None
+
+        for msg_url in msg_urls:
+            if msg_url['guild_id'] != GUILD_ID:
+                continue
+
+            guild = self.bot.get_guild(GUILD_ID) if not guild else guild
+            channel = guild.get_channel(msg_url['channel_id'])
+            if not channel or not isinstance(channel, discord.TextChannel):
+                continue
+
+            try:
+                msg = await channel.fetch_message(msg_url['message_id'])
+            except discord.NotFound:
+                continue
+
+            embed = discord.Embed()
+
+            embed.set_author(
+                name=msg.author.name,
+                icon_url=msg.author.avatar_url
+            )
+
+            description = ''
+
+            if msg.attachments:
+                img = str(msg.attachments[0].url)
+                if any(img.endswith(imgfmt) for imgfmt in ["gif", "png", "jpg"]):
+                    embed.set_image(img)
+
+            if msg.content:
+                description = f'{description}{msg.content}\n'
+
+            if description:
+                description = f'{description}\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_'
+
+            embed.description = f'{description}\n[**View Original**]({msg_url["original"]})'
+            embed.set_footer(text=f'in #{channel.name}')
+            if msg.edited_at:
+                embed.timestamp = msg.edited_at
+            else:
+                embed.timestamp = msg.created_at
+
+            await message.channel.send('', embed=embed)
 
 
 def setup(bot):
