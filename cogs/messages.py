@@ -4,6 +4,7 @@ import discord
 import discord.ext.commands as cmd
 from libraries.checks import is_bot_channel, admin_only
 from utilities.parsing import parse_dice_args, extract_discord_msg_urls
+from utilities.decorators import show_typing
 from config import GUILD_ID, BOT_CH_ID
 
 class MessagesCogs(cmd.Cog):
@@ -13,6 +14,7 @@ class MessagesCogs(cmd.Cog):
 
     @cmd.command(name='dice')
     @is_bot_channel()
+    @show_typing
     async def roll_dice(self, ctx, *, dice_args: str):
         dice_args = parse_dice_args(dice_args)
 
@@ -119,6 +121,7 @@ class MessagesCogs(cmd.Cog):
     @cmd.command(name='say')
     @admin_only()
     @cmd.dm_only()
+    @show_typing
     async def make_bot_say(self, ctx, *, message: str):
         channel = self.bot.get_channel(BOT_CH_ID)
         if channel:
@@ -136,6 +139,7 @@ class MessagesCogs(cmd.Cog):
     @cmd.command(name='rm')
     @admin_only()
     @cmd.guild_only()
+    @show_typing
     async def delete_messages(self, ctx, num_msgs: int, supress_output = False):
         if ctx.guild.id != GUILD_ID:
             await ctx.send('The command can only be used in the Peanuts guild')

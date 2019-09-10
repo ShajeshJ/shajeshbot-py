@@ -20,6 +20,7 @@ class RolesCog(cmd.Cog):
 
     @cmd.command(name='creategroup')
     @is_bot_channel()
+    @show_typing
     async def create_mention_group(self, ctx, *, role_name: str):
         if any(role.name.lower() == role_name.lower() for role in ctx.guild.roles):
             await ctx.send(f'Cannot create another group with the name "{role_name}"')
@@ -114,6 +115,7 @@ class RolesCog(cmd.Cog):
 
     @cmd.command(name='deletegroup')
     @is_bot_channel()
+    @show_typing
     async def delete_mention_group(self, ctx, *, role:discord.Role):
         if role not in ctx.guild.roles:
             await ctx.send(f'{role} no longer exists')

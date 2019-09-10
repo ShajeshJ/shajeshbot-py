@@ -10,6 +10,7 @@ from libraries.error import (
     BotChannelError,
     AdminOnlyError,
 )
+from utilities.decorators import show_typing
 from config import ADMIN_ID, GUILD_ID, BOT_CH_ID
 
 class EmojisCog(cmd.Cog):
@@ -21,6 +22,7 @@ class EmojisCog(cmd.Cog):
 
     @cmd.command(name='emoji')
     @is_bot_channel()
+    @show_typing
     async def request_emoji(self, ctx, *, shortcut: str):
         shortcut = shortcut.lower()
 
@@ -76,6 +78,7 @@ class EmojisCog(cmd.Cog):
     @cmd.command(name='approveemoji')
     @admin_only()
     @cmd.dm_only()
+    @show_typing
     async def approve_emoji(self, ctx, *, shortcut: str):
         if shortcut not in self.__pendingEmojis:
             await ctx.send(f'{shortcut} does not correspond to an active emoji request.')
@@ -134,6 +137,7 @@ class EmojisCog(cmd.Cog):
     @cmd.command(name='rejectemoji')
     @admin_only()
     @cmd.dm_only()
+    @show_typing
     async def reject_emoji(self, ctx, shortcut: str, *, reason:str):
         if shortcut not in self.__pendingEmojis:
             await ctx.send(f'{shortcut} does not correspond to an active emoji request.')
@@ -165,6 +169,7 @@ class EmojisCog(cmd.Cog):
     @cmd.command(name='listemojis')
     @admin_only()
     @cmd.dm_only()
+    @show_typing
     async def list_emojis(self, ctx):
         if len(self.__pendingEmojis) == 0:
             await ctx.send('There are no currently pending emojis')

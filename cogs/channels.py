@@ -3,6 +3,7 @@ import discord
 import re
 
 from libraries.checks import is_bot_channel, admin_only
+from utilities.decorators import show_typing
 from config import ADMIN_ID, BOT_CH_ID, GUILD_ID
 
 class ChannelsCog(cmd.Cog):
@@ -14,6 +15,7 @@ class ChannelsCog(cmd.Cog):
 
     @cmd.command(name='channel')
     @is_bot_channel()
+    @show_typing
     async def request_channel(self, ctx, channel: str, *,
             category: discord.CategoryChannel = None):
         channel = channel.lower()
@@ -59,6 +61,7 @@ class ChannelsCog(cmd.Cog):
     @cmd.command(name='approvechannel')
     @admin_only()
     @cmd.dm_only()
+    @show_typing
     async def approve_channel(self, ctx, channel:str):
         if channel not in self.__pendingChs.keys():
             await ctx.send(f'{channel} is not an active channel request')
@@ -87,6 +90,7 @@ class ChannelsCog(cmd.Cog):
     @cmd.command(name='rejectchannel')
     @admin_only()
     @cmd.dm_only()
+    @show_typing
     async def reject_channel(self, ctx, channel:str, *, reason:str):
         if channel not in self.__pendingChs.keys():
             await ctx.send(f'{channel} is not an active channel request')
@@ -117,6 +121,7 @@ class ChannelsCog(cmd.Cog):
     @cmd.command(name='listchannels')
     @admin_only()
     @cmd.dm_only()
+    @show_typing
     async def list_channels(self, ctx):
         if len(self.__pendingChs) == 0:
             await ctx.send('There are no currently pending channels')
