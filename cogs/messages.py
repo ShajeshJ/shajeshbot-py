@@ -1,4 +1,5 @@
 import random
+import asyncio
 import discord
 import discord.ext.commands as cmd
 from libraries.checks import is_bot_channel, admin_only
@@ -118,10 +119,47 @@ class MessagesCogs(cmd.Cog):
     @cmd.command(name='say')
     @admin_only()
     @cmd.dm_only()
-    async def make_bot_say(self, *, message: str):
+    async def make_bot_say(self, ctx, *, message: str):
         channel = self.bot.get_channel(BOT_CH_ID)
         if not channel:
             await channel.send(message)
+
+    @make_bot_say.error
+    async def bot_say_error_handler(self, ctx, error):
+        if isinstance(error, cmd.MissingRequiredArgument):
+            if error.param.name == 'message':
+                await ctx.send('Must specify the message for the bot to say')
+        else:
+            await self.bot.handle_error(ctx, error)
+
+
+    @cmd.command(name='rm')
+    @admin_only()
+    @cmd.guild_only()
+    async def delete_messages(self, ctx, num_msgs: int, supress_output = False):
+        if ctx.guild.id != GUILD_ID:
+            await ctx.send('The command can only be used in the Peanuts guild')
+        elif num_msgs < 1 or num_msgs > 99:
+            await ctx.send('Requested number of messages to delete must be between 1 to 99 inclusive.')
+        else:
+            tasks = []
+            async for message in ctx.history(limit=num_msgs+1):
+                tasks.append(asyncio.create_task(message.delete))
+
+            for task in tasks:
+                await task
+
+            if not supress_output:
+                await ctx.send(f'{num_msgs} messages deleted successfully.')
+
+    @delete_messages.error
+    async def delete_msgs_error_handler(self, ctx, error):
+        if isinstance(error, cmd.MissingRequiredArgument):
+            if error.param.name == 'num_msgs':
+                await ctx.send('Must specify the number of messages to delete')
+        else:
+            await self.bot.handle_error(ctx, error)
+
 
     @make_bot_say.error
     async def bot_say_error_handler(self, ctx, error):
