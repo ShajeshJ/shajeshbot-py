@@ -1,9 +1,9 @@
 import random
 import discord
 import discord.ext.commands as cmd
-from libraries.checks import is_bot_channel
+from libraries.checks import is_bot_channel, admin_only
 from utilities.parsing import parse_dice_args, extract_discord_msg_urls
-from config import GUILD_ID
+from config import GUILD_ID, BOT_CH_ID
 
 class MessagesCogs(cmd.Cog):
     def __init__(self, bot):
@@ -113,6 +113,23 @@ class MessagesCogs(cmd.Cog):
 
             # Only quote one at a time for now
             break
+
+
+    @cmd.command(name='say')
+    @admin_only()
+    @cmd.dm_only()
+    async def make_bot_say(self, *, message: str):
+        channel = self.bot.get_channel(BOT_CH_ID)
+        if not channel:
+            await channel.send(message)
+
+    @make_bot_say.error
+    async def bot_say_error_handler(self, ctx, error):
+        if isinstance(error, cmd.MissingRequiredArgument):
+            if error.param.name == 'message':
+                await ctx.send('Must specify the message for the bot to say')
+        else:
+            await self.bot.handle_error(ctx, error)
 
 
 def setup(bot):
