@@ -121,7 +121,7 @@ class MessagesCogs(cmd.Cog):
     @cmd.dm_only()
     async def make_bot_say(self, ctx, *, message: str):
         channel = self.bot.get_channel(BOT_CH_ID)
-        if not channel:
+        if channel:
             await channel.send(message)
 
     @make_bot_say.error
@@ -144,7 +144,7 @@ class MessagesCogs(cmd.Cog):
         else:
             tasks = []
             async for message in ctx.history(limit=num_msgs+1):
-                tasks.append(asyncio.create_task(message.delete))
+                tasks.append(asyncio.create_task(message.delete()))
 
             for task in tasks:
                 await task
