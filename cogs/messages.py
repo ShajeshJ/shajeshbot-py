@@ -161,14 +161,5 @@ class MessagesCogs(cmd.Cog):
             await self.bot.handle_error(ctx, error)
 
 
-    @make_bot_say.error
-    async def bot_say_error_handler(self, ctx, error):
-        if isinstance(error, cmd.MissingRequiredArgument):
-            if error.param.name == 'message':
-                await ctx.send('Must specify the message for the bot to say')
-        else:
-            await self.bot.handle_error(ctx, error)
-
-
 def setup(bot):
     bot.add_cog(MessagesCogs(bot))
