@@ -20,6 +20,7 @@ class ShajeshBot(Bot):
         BadArgument
     )
 
+
     async def on_ready(self):
         print(f'Logged on as {self.user}')
 

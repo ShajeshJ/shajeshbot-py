@@ -81,10 +81,20 @@ class MessagesCogs(cmd.Cog):
 
             description = ''
 
+            img_url = None
             if msg.attachments:
-                img = str(msg.attachments[0].url)
-                if any(img.endswith(imgfmt) for imgfmt in ["gif", "png", "jpg"]):
-                    embed.set_image(img)
+                url = msg.attachments[0].url
+                if any(url.endswith(imgfmt) for imgfmt in [".gif", ".png", ".jpg"]):
+                    img_url = url
+
+            if not img_url:
+                for msgEmbed in msg.embeds:
+                    if msgEmbed.type == 'image':
+                        img_url = msgEmbed.url
+                        break
+
+            if img_url:
+                embed.set_image(url=img_url)
 
             if msg.content:
                 description = f'{description}{msg.content}\n'
