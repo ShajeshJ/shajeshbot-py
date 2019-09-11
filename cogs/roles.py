@@ -10,6 +10,7 @@ from libraries.error import (
     BotChannelError,
 )
 from libraries.checks import is_bot_channel
+from utilities.decorators import show_typing
 
 class RolesCog(cmd.Cog):
     _join_emoji = '☑'
