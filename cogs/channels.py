@@ -3,7 +3,7 @@ import discord
 import re
 
 from libraries.checks import is_bot_channel, admin_only
-from utilities.decorators import show_typing
+from libraries.decorators import show_typing
 from config import ADMIN_ID, BOT_CH_ID, GUILD_ID
 
 class ChannelsCog(cmd.Cog):

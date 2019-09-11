@@ -3,8 +3,8 @@ import asyncio
 import discord
 import discord.ext.commands as cmd
 from libraries.checks import is_bot_channel, admin_only
-from utilities.parsing import parse_dice_args, extract_discord_msg_urls
-from utilities.decorators import show_typing
+from libraries.parsing import parse_dice_args, extract_discord_msg_urls
+from libraries.decorators import show_typing
 from config import GUILD_ID, BOT_CH_ID
 
 class MessagesCogs(cmd.Cog):

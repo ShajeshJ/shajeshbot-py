@@ -10,7 +10,7 @@ from libraries.error import (
     BotChannelError,
     AdminOnlyError,
 )
-from utilities.decorators import show_typing
+from libraries.decorators import show_typing
 from config import ADMIN_ID, GUILD_ID, BOT_CH_ID
 
 class EmojisCog(cmd.Cog):
