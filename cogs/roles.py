@@ -28,7 +28,7 @@ class RolesCog(cmd.Cog, name='Roles'):
     async def create_mention_group(self, ctx, *, role_name: str):
         """
         The specified role name cannot be already taken. Once the role is created, a message 
-        will show up in the "mention_role" channel with a mention to the created role.
+        will show up in the "mention_roles" channel with a mention to the created role.
         <\\n><\\n>
         To join the role, react to the message with ☑. To leave the role, remove your reaction.
         """
@@ -136,7 +136,7 @@ class RolesCog(cmd.Cog, name='Roles'):
         mention roles that were created using the "role" command. You also cannot delete 
         the role if other users are in it.
         <\\n><\\n>
-        Once the role is deleted, the join message will be removed from the mention_channel.
+        Once the role is deleted, the join message will be removed from the mention_role channel.
         """
 
         if role not in ctx.guild.roles:

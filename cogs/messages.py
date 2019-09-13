@@ -197,13 +197,21 @@ class MessagesCogs(cmd.Cog, name='Messages'):
     @show_typing
     async def send_patch_notes(self, ctx, suppress: Optional[bool] = True, *, notes: str):
         bot_ch = ctx.bot.get_channel(BOT_CH_ID)
-        crew = ctx.guild.get_role(CREW_ROLE_ID)
+        crew = self.bot.get_guild(GUILD_ID).get_role(CREW_ROLE_ID)
         text = notes
         if not suppress:
             text = f'{crew.mention} {text}'
 
         msg = await bot_ch.send(text)
         await msg.pin()
+
+    @send_patch_notes.error
+    async def patch_notes_error_handler(self, ctx, error):
+        if isinstance(error, cmd.MissingRequiredArgument):
+            if error.param.name == 'notes':
+                await ctx.send('Must specify the patch notes to send')
+        else:
+            await self.bot.handle_error(ctx, error)
 
 
     @cmd.command(
