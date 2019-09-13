@@ -12,17 +12,27 @@ from libraries.error import (
 from libraries.checks import is_bot_channel
 from libraries.decorators import show_typing
 
-class RolesCog(cmd.Cog):
+class RolesCog(cmd.Cog, name='Roles'):
     _join_emoji = '☑'
 
     def __init__(self, bot):
         self.bot = bot
 
 
-    @cmd.command(name='creategroup')
+    @cmd.command(
+        name='role', aliases=['createrole', 'crole'],
+        brief='Create a mention role', usage='<role_name>'
+    )
     @is_bot_channel()
     @show_typing
     async def create_mention_group(self, ctx, *, role_name: str):
+        """
+        The specified role name cannot be already taken. Once the role is created, a message 
+        will show up in the "mention_role" channel with a mention to the created role.
+        <\\n><\\n>
+        To join the role, react to the message with ☑. To leave the role, remove your reaction.
+        """
+
         if any(role.name.lower() == role_name.lower() for role in ctx.guild.roles):
             await ctx.send(f'Cannot create another group with the name "{role_name}"')
             return
@@ -114,10 +124,21 @@ class RolesCog(cmd.Cog):
         await user.remove_roles(role, reason='Bot command', atomic=True)
 
 
-    @cmd.command(name='deletegroup')
+    @cmd.command(
+        name='deleterole', aliases=['drole'],
+        brief='Delete a mention role', usage='<role>'
+    )
     @is_bot_channel()
     @show_typing
     async def delete_mention_group(self, ctx, *, role:discord.Role):
+        """
+        The specified role is case-sensitive. You can only use this command to delete 
+        mention roles that were created using the "role" command. You also cannot delete 
+        the role if other users are in it.
+        <\\n><\\n>
+        Once the role is deleted, the join message will be removed from the mention_channel.
+        """
+
         if role not in ctx.guild.roles:
             await ctx.send(f'{role} no longer exists')
             return
@@ -135,24 +156,11 @@ class RolesCog(cmd.Cog):
                 break
 
         if not role_join_msg:
-            await ctx.send(f'{role} is not a deletable mention group')
+            await ctx.send(f'{role} is not a deletable mention role')
 
-        reaction = (
-            reaction
-            for reaction in role_join_msg.reactions
-            if reaction.emoji == self._join_emoji
-        )
-        reaction = next(reaction, None)
-
-        if reaction:
-            if reaction.count > 1:
-                await ctx.send(f'{role} cannot be deleted while other users are in it')
-                return
-
-            users = await reaction.users().flatten()
-            if any(user != self.bot.user for user in users):
-                await ctx.send(f'{role} cannot be deleted while other users are in it')
-                return
+        if role.members and any(member != ctx.author for member in role.members):
+            await ctx.send(f'{role} cannot be deleted while other users are in it')
+            return
 
         await role.delete(reason='Bot command')
         await role_join_msg.delete()

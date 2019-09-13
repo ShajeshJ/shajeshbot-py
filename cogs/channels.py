@@ -6,18 +6,33 @@ from libraries.checks import is_bot_channel, admin_only
 from libraries.decorators import show_typing
 from config import ADMIN_ID, BOT_CH_ID, GUILD_ID
 
-class ChannelsCog(cmd.Cog):
+class ChannelsCog(cmd.Cog, name='Channels'):
     __pendingChs = {}
 
     def __init__(self, bot):
         self.bot = bot
 
 
-    @cmd.command(name='channel')
+    @cmd.command(
+        name='channel', aliases=['creq'],
+        brief='Request a channel', usage='<channel> [category]'
+    )
     @is_bot_channel()
     @show_typing
     async def request_channel(self, ctx, channel: str, *,
             category: discord.CategoryChannel = None):
+        """
+        This command will request a new text channel. The channel name can only contain 
+        alphanumeric, dash, and underscore characters. You cannot specify a name for an 
+        existing or pending channel.
+        <\\n><\\n>
+        You can optionally specify an existing category for the text channel. The category 
+        name is case sensitive.
+        <\\n><\\n>
+        Once the request is created, you will be notified when it is approved or denied by 
+        an admin.
+        """
+
         channel = channel.lower()
 
         if not self._valid_channel_name(channel):
@@ -58,7 +73,7 @@ class ChannelsCog(cmd.Cog):
             await self.bot.handle_error(ctx, error)
 
 
-    @cmd.command(name='approvechannel')
+    @cmd.command(name='approvechannel', hidden=True)
     @admin_only()
     @cmd.dm_only()
     @show_typing
@@ -87,7 +102,7 @@ class ChannelsCog(cmd.Cog):
             await self.bot.handle_error(ctx, error)
 
 
-    @cmd.command(name='rejectchannel')
+    @cmd.command(name='rejectchannel', hidden=True)
     @admin_only()
     @cmd.dm_only()
     @show_typing
@@ -118,7 +133,7 @@ class ChannelsCog(cmd.Cog):
             await self.bot.handle_error(ctx, error)
 
 
-    @cmd.command(name='listchannels')
+    @cmd.command(name='listchannels', hidden=True)
     @admin_only()
     @cmd.dm_only()
     @show_typing

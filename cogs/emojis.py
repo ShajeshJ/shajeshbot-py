@@ -13,17 +13,33 @@ from libraries.error import (
 from libraries.decorators import show_typing
 from config import ADMIN_ID, GUILD_ID, BOT_CH_ID
 
-class EmojisCog(cmd.Cog):
+class EmojisCog(cmd.Cog, name='Emojis'):
     __pendingEmojis = {}
 
     def __init__(self, bot):
         self.bot = bot
 
 
-    @cmd.command(name='emoji')
+    @cmd.command(
+        name='emoji', aliases=['emote', 'ereq'],
+        brief='Request an emoji', usage='<emoji_shortcut>'
+    )
     @is_bot_channel()
     @show_typing
     async def request_emoji(self, ctx, *, shortcut: str):
+        """
+        This command will request a new guild emoji. The emoji shortcut can only contain 
+        alphanumeric and underscore characters. You cannot specify a shortcut for an existing emoji.
+        <\\n><\\n>
+        The emoji image to use should be added as an attachment to the message. Only 1 image should 
+        be attached, and the image cannot be any larger than 256 kb.
+        <\\n><\\n>
+        You can update the image of an actively pending emoji by using this command with the same shortcut 
+        name as the pending request.
+        <\\n><\\n>
+        Once the request is created, you will be notified if it is denied by an admin.
+        """
+
         shortcut = shortcut.lower()
 
         if not self._is_alphanumeric(shortcut):
@@ -75,7 +91,7 @@ class EmojisCog(cmd.Cog):
             await self.bot.handle_error(ctx, error)
 
 
-    @cmd.command(name='approveemoji')
+    @cmd.command(name='approveemoji', hidden=True)
     @admin_only()
     @cmd.dm_only()
     @show_typing
@@ -134,7 +150,7 @@ class EmojisCog(cmd.Cog):
             await self.bot.handle_error(ctx, error)
 
 
-    @cmd.command(name='rejectemoji')
+    @cmd.command(name='rejectemoji', hidden=True)
     @admin_only()
     @cmd.dm_only()
     @show_typing
@@ -166,7 +182,7 @@ class EmojisCog(cmd.Cog):
             await self.bot.handle_error(ctx, error)
 
 
-    @cmd.command(name='listemojis')
+    @cmd.command(name='listemojis', hidden=True)
     @admin_only()
     @cmd.dm_only()
     @show_typing

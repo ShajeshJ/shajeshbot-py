@@ -1,7 +1,7 @@
 import discord.ext.commands as cmd
 import discord
 
-class UsersCog(cmd.Cog):
+class UsersCog(cmd.Cog, name='Users'):
     def __init__(self, bot):
         self.bot = bot
 

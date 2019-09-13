@@ -7,6 +7,7 @@ import traceback
 #invite https://discordapp.com/oauth2/authorize?client_id=421836036101111818&scope=bot&permissions=1610087545
 
 bot = ShajeshBot(command_prefix='!')
+bot.remove_command('help')
 
 unloaded_files = []
 for filename in os.listdir('cogs'):
