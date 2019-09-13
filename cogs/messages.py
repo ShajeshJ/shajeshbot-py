@@ -1,12 +1,13 @@
 import random
 import asyncio
+from typing import Optional
 import discord
 import discord.ext.commands as cmd
 from libraries.checks import is_bot_channel, admin_only
 from libraries.parsing import parse_dice_args, extract_discord_msg_urls
 from libraries.decorators import show_typing
 from libraries.converters import CommandConverter
-from config import GUILD_ID, BOT_CH_ID
+from config import GUILD_ID, BOT_CH_ID, CREW_ROLE_ID
 
 class MessagesCogs(cmd.Cog, name='Messages'):
     ZW_SPACE = '\u200b'
@@ -190,6 +191,21 @@ class MessagesCogs(cmd.Cog, name='Messages'):
             await self.bot.handle_error(ctx, error)
 
 
+    @cmd.command(name='patch', hidden=True)
+    @admin_only()
+    @cmd.dm_only()
+    @show_typing
+    async def send_patch_notes(self, ctx, suppress: Optional[bool] = True, *, notes: str):
+        bot_ch = ctx.bot.get_channel(BOT_CH_ID)
+        crew = ctx.guild.get_role(CREW_ROLE_ID)
+        text = notes
+        if not suppress:
+            text = f'{crew.mention} {text}'
+
+        msg = await bot_ch.send(text)
+        await msg.pin()
+
+
     @cmd.command(
         name='help', aliases=['info', 'h'],
         brief='Shows help usage for commands', usage='[command_name]'
@@ -240,7 +256,6 @@ class MessagesCogs(cmd.Cog, name='Messages'):
         prefix = ctx.bot.command_prefix
 
         embed = discord.Embed()
-        # embed.title = command.cog_name
         embed.description = f'**```asciidoc\n=== {prefix}{command.name} {command.usage} ===```**'
         embed.description += f' *<params> are required, and [params] are optional*\n{self.ZW_SPACE}'
         embed.colour = 0x3473d9
