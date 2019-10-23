@@ -1,5 +1,5 @@
 import re
-import requests
+from aiohttp import ClientSession
 from io import BytesIO
 
 import discord
@@ -107,8 +107,10 @@ class EmojisCog(cmd.Cog, name='Emojis'):
         user = self.__pendingEmojis[shortcut]['user']
 
         try:
-            img_content = requests.get(url).content
-            image = BytesIO(img_content).getvalue()
+            async with ClientSession() as session:
+                async with session.get(url) as resp:
+                    img_content = await resp.read()
+                    image = BytesIO(img_content).getvalue()
         except:
             await ctx.send(f'Failed to download the emoji image from {url}')
             await bot_channel.send(
