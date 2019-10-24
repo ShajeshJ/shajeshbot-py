@@ -8,3 +8,6 @@ class BotChannelError(cmd.CommandError):
 
 class AdminOnlyError(cmd.CommandError):
     pass
+
+class StocksApiError(cmd.CommandError):
+    pass

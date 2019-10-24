@@ -9,7 +9,8 @@ from discord.ext.commands import (
 
 from libraries.error import (
     AdminOnlyError,
-    BotChannelError
+    BotChannelError,
+    StocksApiError,
 )
 
 class ShajeshBot(Bot):
@@ -17,7 +18,8 @@ class ShajeshBot(Bot):
         BotChannelError,
         PrivateMessageOnly,
         AdminOnlyError,
-        BadArgument
+        BadArgument,
+        StocksApiError,
     )
 
 
@@ -49,3 +51,8 @@ class ShajeshBot(Bot):
             print(str(exception))
         elif isinstance(exception, BadArgument):
             await context.send(str(exception))
+        elif isinstance(exception, StocksApiError):
+            await context.send(str(exception))
+            if exception.__cause__ is not None:
+                cause = exception.__cause__
+                traceback.print_exception(type(cause), cause, cause.__traceback__, file=sys.stderr)
