@@ -40,6 +40,7 @@ class ShajeshBot(Bot):
     async def handle_error(self, context, exception):
         if not isinstance(exception, self.__common_errors):
             traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
+            await context.send('Something seriously broke... send help...')
 
 
     async def __handle_common_errors(self, context, exception):
@@ -52,7 +53,7 @@ class ShajeshBot(Bot):
         elif isinstance(exception, BadArgument):
             await context.send(str(exception))
         elif isinstance(exception, StocksApiError):
-            await context.send(str(exception))
             if exception.__cause__ is not None:
                 cause = exception.__cause__
                 traceback.print_exception(type(cause), cause, cause.__traceback__, file=sys.stderr)
+            await context.send(str(exception))

@@ -38,50 +38,58 @@ class StocksCog(cmd.Cog, name='Stocks'):
             await ctx.send(f'No recent stock information for "{ticker.upper()}" available.')
             return
 
-        today_dp = resp['datapoints'][-1]
-        yest_dp = resp['datapoints'][-2]
-
-        diff = today_dp['close'] - yest_dp['close']
-        percent_diff = diff / yest_dp['close'] * 100
-
         embed = discord.Embed()
         embed.title = f'__{resp["symbol"]}__ Stock Info (Daily)'
         embed.url = f'https://ca.finance.yahoo.com/quote/{resp["symbol"]}'
         embed.colour = 0x8934d9
-
-        sign = '' if diff < 0 else '+'
-        embed.description = f'**```diff\n{sign}{diff:.2f} ({sign}{percent_diff:.2f}%)```**'
-
-        embed.add_field(name='Close', value=f'{today_dp["close"] : .2f}')
-        embed.add_field(name='Previous Close', value=f'{yest_dp["close"] : .2f}')
-        embed.add_field(name='Open', value=f'{today_dp["open"] : .2f}')
-        embed.add_field(name='Day\'s Range', value=f'{today_dp["low"]:.2f} - {today_dp["high"]:.2f}')
-
         embed.set_footer(text=f'Last refreshed {resp["refreshed"].date()}')
 
-        plt.figure(figsize=(15,10), dpi=40)
+        if len(resp['datapoints'] < 2):
+            today_dp = resp['datapoints'][-1]
+            embed.description = f'**```diff\nData for yesterady unavailable```**'
+            embed.add_field(name='Close', value=f'{today_dp["close"] : .2f}')
+            embed.add_field(name='Open', value=f'{today_dp["open"] : .2f}')
+            embed.add_field(name='Day\'s Range', value=f'{today_dp["low"]:.2f} - {today_dp["high"]:.2f}')
+            await ctx.send('', embed=embed)
+        else:
+            today_dp = resp['datapoints'][-1]
+            yest_dp = resp['datapoints'][-2]
 
-        x = [d['date'] for d in resp['datapoints']]
-        y = [d['close'] for d in resp['datapoints']]
-        plt.plot(x, y, color='tab:red')
+            diff = today_dp['close'] - yest_dp['close']
+            percent_diff = diff / yest_dp['close'] * 100
 
-        plt.xticks(fontsize=24)
-        plt.yticks(fontsize=24)
+            sign = '' if diff < 0 else '+'
+            embed.description = f'**```diff\n{sign}{diff:.2f} ({sign}{percent_diff:.2f}%)```**'
 
-        plt.grid(axis='both', alpha=1)
-        plt.gca().spines["top"].set_alpha(0.0)
-        plt.gca().spines["bottom"].set_alpha(0.0)
-        plt.gca().spines["right"].set_alpha(0.0)
-        plt.gca().spines["left"].set_alpha(0.0)
+            embed.add_field(name='Close', value=f'{today_dp["close"] : .2f}')
+            embed.add_field(name='Previous Close', value=f'{yest_dp["close"] : .2f}')
+            embed.add_field(name='Open', value=f'{today_dp["open"] : .2f}')
+            embed.add_field(name='Day\'s Range', value=f'{today_dp["low"]:.2f} - {today_dp["high"]:.2f}')
 
-        img_buffer = BytesIO()
-        plt.savefig(img_buffer, format='png', bbox_inches='tight')
-        img_buffer.seek(0)
+            plt.figure(figsize=(15,10), dpi=40)
 
-        plt.close('all')
+            x = [d['date'] for d in resp['datapoints']]
+            y = [d['close'] for d in resp['datapoints']]
+            plt.plot(x, y, color='tab:red')
 
-        embed.set_image(url='attachment://stocksgraph.png')
-        await ctx.send(file=discord.File(img_buffer, 'stocksgraph.png'), embed=embed)
+            plt.xticks(fontsize=24)
+            plt.yticks(fontsize=24)
+
+            plt.grid(axis='both', alpha=1)
+            plt.gca().spines["top"].set_alpha(0.0)
+            plt.gca().spines["bottom"].set_alpha(0.0)
+            plt.gca().spines["right"].set_alpha(0.0)
+            plt.gca().spines["left"].set_alpha(0.0)
+
+            img_buffer = BytesIO()
+            plt.savefig(img_buffer, format='png', bbox_inches='tight')
+            img_buffer.seek(0)
+
+            plt.close('all')
+
+            embed.set_image(url='attachment://stocksgraph.png')
+            await ctx.send(file=discord.File(img_buffer, 'stocksgraph.png'), embed=embed)
+
 
     @request_channel.error
     async def channel_error_handler(self, ctx, error):
