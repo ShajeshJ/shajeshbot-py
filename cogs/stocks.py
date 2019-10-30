@@ -44,7 +44,7 @@ class StocksCog(cmd.Cog, name='Stocks'):
         embed.colour = 0x8934d9
         embed.set_footer(text=f'Last refreshed {resp["refreshed"].date()}')
 
-        if len(resp['datapoints']) < 2):
+        if len(resp['datapoints']) < 2:
             today_dp = resp['datapoints'][-1]
             embed.description = f'**```diff\nData for yesterady unavailable```**'
             embed.add_field(name='Close', value=f'{today_dp["close"] : .2f}')
