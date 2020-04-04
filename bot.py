@@ -24,7 +24,9 @@ class ShajeshBot(Bot):
 
 
     async def on_ready(self):
-        await self.change_presence(activity=discord.Game(name='!help'))
+        # status = discord.CustomActivity(name='Message "!help" for commands')
+        status = discord.Activity(type=discord.ActivityType.watching, name="for !help command")
+        await self.change_presence(activity=status)
         print(f'Logged on as {self.user}')
 
 
