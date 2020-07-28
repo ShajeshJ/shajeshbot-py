@@ -9,11 +9,11 @@ class UsersCog(cmd.Cog, name='Users'):
     @cmd.Cog.listener(name='on_member_update')
     async def fix_nicknames(self, before, after):
         if after.nick:
-            new_nick = null
+            new_nick = None
             identifier = f' [{after.name}]'
 
             if before.name != after.name:
-                new_nick = null
+                new_nick = None
             elif not after.nick.endswith(identifier):
                 new_nick = f'{after.nick}{identifier}'
                 if len(new_nick) > 32:
