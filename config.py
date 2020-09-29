@@ -1,5 +1,9 @@
 import os
 
+if not os.environ.get('SHAJESHBOT_TOKEN'):
+    from dotenv import load_dotenv
+    load_dotenv('.env')
+
 BOT_TOKEN = os.environ['SHAJESHBOT_TOKEN']
 
 MENTION_CH_ID = int(os.environ['MENTION_CHANNEL'])

@@ -1,10 +1,11 @@
+import discord
 from bot import ShajeshBot
 from config import BOT_TOKEN
 from libraries.checks import admin_only
 import os
 import traceback
 
-bot = ShajeshBot(command_prefix='!')
+bot = ShajeshBot(command_prefix='!', intents=discord.Intents.all())
 bot.remove_command('help')
 
 unloaded_files = []
