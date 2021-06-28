@@ -13,7 +13,7 @@ dice_regex = (
 
 # Try to match discord message link
 discord_msg_url_regex = (
-    'https?:\\/\\/discordapp\\.com\\/channels\\/'
+    'https?:\\/\\/discord\\.com\\/channels\\/'
     '(?P<g_id>[0-9]+)\\/'
     '(?P<c_id>[0-9]+)\\/'
     '(?P<m_id>[0-9]+)'
