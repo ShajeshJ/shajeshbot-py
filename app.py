@@ -26,7 +26,7 @@ async def reload_ext(ctx, *, ext:str):
     async def try_reload(ext, send_error=False):
         try:
             bot.reload_extension(ext)
-        except:
+        except Exception as e:
             if send_error:
                 print(f'**ERROR** {type(e).__name__} - {e}')
                 await ctx.send('fail')
