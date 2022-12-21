@@ -11,7 +11,7 @@ from libraries.error import StocksApiError
 
 class StocksApiWrapper:
     __FUNC = {
-        "daily": "TIME_SERIES_DAILY"
+        "daily": "TIME_SERIES_DAILY_ADJUSTED"
     }
 
     def __init__(self, ticker: str):
@@ -39,7 +39,7 @@ class StocksApiWrapper:
                 'high': float(v['2. high']),
                 'low': float(v['3. low']),
                 'close': float(v['4. close']),
-                'volume': float(v['5. volume']),
+                'volume': float(v['6. volume']),
             } for k, v in datapoints.items()]
 
             resp['datapoints'].sort(key=lambda d: d['date'])
