@@ -4,6 +4,7 @@ from config import BOT_TOKEN
 from libraries.checks import admin_only
 import os
 import traceback
+from keep_alive import keep_alive
 
 bot = ShajeshBot(command_prefix='!', intents=discord.Intents.all())
 bot.remove_command('help')
@@ -41,4 +42,5 @@ async def reload_ext(ctx, *, ext:str):
 
 
 if __name__ == "__main__":
+    keep_alive()
     bot.run(BOT_TOKEN)
